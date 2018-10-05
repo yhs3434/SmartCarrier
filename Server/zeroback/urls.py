@@ -18,10 +18,13 @@ from django.urls import path, include
 from rest_framework import routers
 from gps import views
 
+'''
 router = routers.DefaultRouter()
-router.register('gpses', views.GpsViewSet)
+router.register('gps', views.GpsViewSet)
+router.register('gps/where', views.GpsMyViewSet)
+'''
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',include(router.urls)),
+    path('gps/', include('gps.urls')),
 ]
