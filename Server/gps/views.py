@@ -1,24 +1,22 @@
 from .models import Gps
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
 from .serializers import GpsSerializer
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework import status
 
-@csrf_exempt
-def gps_list(request):
+@api_view(['GET', 'POST'])
+def gps_list(request, format=None):
     if (request.method == 'GET'):
         gpses = Gps.objects.all()
         serializer = GpsSerializer(gpses, many=True)
-        return (JsonResponse(serializer.data, safe=False))
+        return (Response(serializer.data))
 
     elif (request.method == 'POST'):
-        data = JSONParser().parse(request)
-        serializer = GpsSerializer(data = data)
+        serializer = GpsSerializer(data = request.data)
         if (serializer.is_valid()):
             serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return (JsonResponse(serializer.errors, status=400))
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return (Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST))
 '''
 POST data example
 request_data = {
@@ -30,24 +28,24 @@ request_data = {
 }
 '''
 
-def gps_detail(request, pk):
+@api_view(['GET', 'PUT', 'DELETE'])
+def gps_detail(request, pk, format=None):
     try:
         gps = Gps.objects.get(pk=pk)
     except Gps.DoesNotExist:
-        return (HttpResponse(status=404))
+        return (Response(status=status.HTTP_404_NOT_FOUND))
     
     if request.method == 'GET':
         serializer = GpsSerializer(gps)
-        return (JsonResponse(serializer.data))
+        return (Response(serializer.data))
 
     if request.method == 'PUT':
-        data = JSONParser().parse(request)
-        serializer = GpsSerializer(gps, data=data)
+        serializer = GpsSerializer(gps, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return (JsonResponse(serializer.data))
-        return (JsonResponse(serializer.errors, status=400))
+            return (Response(serializer.data))
+        return (Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST))
 
     if request.method == 'DELETE':
         gps.delete()
-        return HttpResponse(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)
