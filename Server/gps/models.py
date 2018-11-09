@@ -14,3 +14,7 @@ class Gps(models.Model):
 
     def __position__(self):
         return str(self.latitude)+", "+str(self.longitude)
+
+class Beacon(models.Model):
+    beacon = models.CharField(max_length=20)
+    distance = models.FloatField(null=True)
